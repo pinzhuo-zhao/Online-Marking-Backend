@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.TeamMapper">
+    <insert id="insertTeam" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.feredback.feredback_backend.entity.Team">
+        INSERT INTO
+            team (team_name, subject_id, create_time, update_time)
+        VALUES (#{teamName},#{subjectId}, #{createTime}, #{updateTime})
+
+    </insert>
+
+    <select id="findTeamById" resultType="com.feredback.feredback_backend.entity.Team">
+        SELECT * FROM team
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <update id="updateTeam">
+        UPDATE team
+        <set>
+            <if test="teamName != null">
+                team_name = #{teamName},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteTeamById">
+        UPDATE team
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            id = #{id} AND is_deleted = 0
+    </update>
+
+
+    <select id="getCandidatesInTeam" resultType="com.feredback.feredback_backend.entity.vo.CandidateVo">
+        SELECT
+            c.id, c.first_name, c.last_name
+        FROM candidate_team_mid ct INNER JOIN candidate c
+                                              ON c.id = ct.candidate_id
+        WHERE ct.team_id = #{teamId} AND ct.is_deleted = 0 AND c.is_deleted = 0
+    </select>
+
+
+    <insert id="addCandidateToTeam">
+        INSERT INTO
+            candidate_team_mid (candidate_id, team_id, create_time, update_time)
+        VALUES (#{candidateId}, #{teamId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="deleteCandidateInTeam">
+        UPDATE candidate_team_mid
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            candidate_id = #{candidateId} AND team_id = #{teamId} AND is_deleted = 0
+    </update>
+
+
+
+
+    <select id="findTeamByName" resultType="com.feredback.feredback_backend.entity.Team">
+        SELECT * FROM team WHERE team_name = #{name} AND is_deleted = 0
+    </select>
+
+
+
+    <select id="findAllTeamsInSubject" resultType="com.feredback.feredback_backend.entity.Team">
+        SELECT * FROM team where subject_id = #{subjectId} AND is_deleted = 0
+    </select>
+
+    <select id="findDuplicatedCandidateInTeam" resultType="java.lang.Integer">
+        SELECT * FROM candidate_team_mid
+            WHERE candidate_id = #{candidateId} AND team_id = #{teamId} AND is_deleted = 0
+    </select>
+
+    <select id="findDuplicatedTeamInProject" resultType="java.lang.Integer">
+        SELECT count(id) FROM project_team_mid
+            WHERE project_id = #{projectId} AND team_id = #{teamId} AND is_deleted = 0
+    </select>
+
+
+    <insert id="addTeamToProject">
+        INSERT INTO
+            project_team_mid (project_id, team_id, create_time, update_time)
+        VALUES (#{projectId}, #{teamId}, #{createTime}, #{updateTime})
+    </insert>
+
+
+    <update id="removeTeamFromProject">
+        UPDATE  project_team_mid
+            SET is_deleted = 1,
+                update_time = #{updateTime}
+        WHERE
+            project_id = #{projectId} AND team_id = #{teamId} AND is_deleted = 0
+    </update>
+
+    <update id="removeTeamFromAllProjects">
+        UPDATE  project_team_mid
+        SET is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            team_id = #{teamId} AND is_deleted = 0
+    </update>
+
+    <update id="removeAllCandidatesFromTeam">
+        UPDATE  candidate_team_mid
+        SET is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            team_id = #{teamId} AND is_deleted = 0
+    </update>
+
+
+</mapper>
+   

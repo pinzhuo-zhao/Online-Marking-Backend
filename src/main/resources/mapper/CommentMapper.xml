@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.CommentMapper">
+    <sql id="selectSql">
+        SELECT
+            id,
+            content,
+            `level`
+        FROM
+            `comment`
+    </sql>
+
+    <sql id="selectJoinRubricSubItem">
+        SELECT
+            c.id,
+            c.content,
+            c.`level`
+        FROM `comment` AS c
+        JOIN rubric_subitem_comment_mid AS mid
+        ON c.id = mid.comment_id
+        AND c.is_deleted = 0
+        AND mid.is_deleted = 0
+    </sql>
+
+    <insert id="insertComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            comment (content, `level`, create_time, update_time)
+        VALUES
+            (#{content}, #{level}, #{createTime}, #{updateTime})
+    </insert>
+    <delete id="clearCommentInSubItem">
+        DELETE FROM rubric_subitem_comment_mid
+            WHERE rubric_subitem_id = #{rubricSubItemId} AND is_deleted = 0
+    </delete>
+
+    <select id="findCommentById" resultType="com.feredback.feredback_backend.entity.Comment">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </select>
+
+    <select id="findCommentByContent" resultType="com.feredback.feredback_backend.entity.Comment">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 and content LIKE CONCAT('%',#{content},'%')
+        </where>
+    </select>
+
+    <select id="findCommentByLevel" resultType="com.feredback.feredback_backend.entity.Comment">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND `level` = #{level}
+        </where>
+    </select>
+
+    <select id="findCommentByRubricSubItemId" resultType="com.feredback.feredback_backend.entity.Comment">
+        <include refid="selectJoinRubricSubItem"/>
+        <where>
+            mid.rubric_subitem_id = #{rubricSubItemId}
+        </where>
+    </select>
+
+    <select id="findAllComments" resultType="com.feredback.feredback_backend.entity.Comment">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0
+        </where>
+    </select>
+
+    <update id="updateCommentById">
+        UPDATE comment
+        <set>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="level != null">
+                `level` = #{level},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+
+    <update id="deleteCommentById">
+        UPDATE comment
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+</mapper>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.TemplateMapper">
+
+    <sql id="selectSql">
+        SELECT
+            id,
+            `name`,
+            description,
+            subject_id
+        FROM template
+    </sql>
+
+    <insert id="insertTemplate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            template (`name`, subject_id, description, create_time, update_time)
+        VALUES (#{name}, #{subjectId}, #{description}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="addRubricItemToTemplate">
+        INSERT INTO
+            template_rubric_item_mid (template_id, rubric_item_id, create_time, update_time)
+        VALUES (#{templateId}, #{rubricItemId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="removeRubricItemFromTemplate">
+        UPDATE template_rubric_item_mid
+        SET is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            template_id = #{templateId} AND rubric_item_id = #{rubricItemId} AND is_deleted = 0
+    </update>
+
+    <update id="updateTemplate">
+        UPDATE template
+        <set>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteTemplateById">
+        UPDATE template
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="findTemplateByName" resultType="com.feredback.feredback_backend.entity.Template">
+        <include refid="selectSql"/>
+        <where>
+            `name` = #{name} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="findTemplateById" resultType="com.feredback.feredback_backend.entity.Template">
+        <include refid="selectSql"/>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="findAllTemplate" resultType="com.feredback.feredback_backend.entity.Template">
+        <include refid="selectSql"/>
+        <where>
+            subject_id = #{subjectId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="findDuplicatedRubricItemInTemplate" resultType="java.lang.Integer">
+        SELECT count(id) FROM template_rubric_item_mid
+        WHERE template_id = #{templateId} AND rubric_item_id = #{rubricItemId} AND is_deleted = 0
+    </select>
+
+    <select id="findDuplicatedTemplateNameInSubject" resultType="java.lang.Integer">
+        SELECT count(id) FROM template
+        WHERE subject_id = #{subjectId} AND name = #{name} AND is_deleted = 0
+    </select>
+
+    <update id="connectTemplateToProject">
+        UPDATE project
+        SET template_id = #{templateId},
+        update_time = #{updateTime}
+
+        WHERE id = #{projectId} AND is_deleted = 0
+    </update>
+
+    <update id="removeTemplateFromProject">
+        UPDATE project
+        SET template_id = null,
+            update_time = #{updateTime}
+
+        WHERE id = #{projectId} AND is_deleted = 0
+    </update>
+
+
+    <update id="removeAllRubricItemsFromTemplate">
+        UPDATE template_rubric_item_mid
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND template_id = #{templateId}
+        </where>
+    </update>
+
+
+</mapper>
+   

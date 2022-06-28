@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.MarkSettingMapper">
+    <sql id="selectSql">
+        SELECT
+            id,
+            maximum,
+            weighting,
+            `increment`
+        FROM
+            rubric_mark_setting
+    </sql>
+
+    <sql id="selectJoinRubricItem">
+        SELECT
+            m.id,
+            m.maximum,
+            m.weighting,
+            m.`increment`
+        FROM rubric_mark_setting as m
+        JOIN rubric_item as r
+        ON m.rubric_item_id = r.id
+        AND m.is_deleted = 0
+        AND r.is_deleted = 0
+    </sql>
+
+    <insert id="insertMarkSetting" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            rubric_mark_setting (maximum, weighting, `increment`, create_time, update_time, template_id, rubric_item_id)
+        VALUES
+            (#{maximum}, #{weighting}, #{increment}, #{createTime}, #{updateTime}, #{templateId}, #{rubricItemId})
+    </insert>
+    <delete id="deleteMarkSettingByTemplateIdAndItemId">
+        DELETE FROM rubric_mark_setting
+            WHERE template_id = #{templateId}
+             AND rubric_item_id = #{rubricItemId}
+             AND is_deleted = 0
+    </delete>
+
+    <select id="findMarkSettingById" resultType="com.feredback.feredback_backend.entity.MarkSetting">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </select>
+
+    <select id="findMarkSettingByCondition" resultType="com.feredback.feredback_backend.entity.MarkSetting">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0
+            <if test="maximum != null">
+                AND maximum = #{maximum}
+            </if>
+            <if test="weighting != null">
+                AND weighting = #{weighting}
+            </if>
+            <if test="increment != null">
+                AND `increment` = #{increment}
+            </if>
+        </where>
+    </select>
+
+    <select id="findMarkSettingByRubricItemIdAndTemplateId" resultType="com.feredback.feredback_backend.entity.MarkSetting">
+        <include refid="selectJoinRubricItem"/>
+        <where>
+            m.rubric_item_id = #{rubricItemId} AND m.template_id = #{templateId}
+        </where>
+    </select>
+
+
+    <select id="findAllMarkSettings" resultType="com.feredback.feredback_backend.entity.MarkSetting">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0
+        </where>
+    </select>
+
+
+    <update id="updateMarkSettingById">
+        UPDATE rubric_mark_setting
+        <set>
+            <if test="maximum != null">
+                maximum = #{maximum},
+            </if>
+            <if test="weighting != null">
+                weighting = #{weighting},
+            </if>
+            <if test="increment != null">
+                `increment` = #{increment},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+
+    <update id="deleteMarkSettingById">
+        UPDATE rubric_mark_setting
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+</mapper>

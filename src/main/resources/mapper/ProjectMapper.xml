@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.ProjectMapper">
+    <insert id="insertProject">
+        INSERT INTO
+            project (project_description, is_individual, template_id ,subject_id, duration, warning_time, create_time, update_time)
+        VALUES (#{projectDescription},#{isIndividual}, #{templateId}, #{subjectId}, #{duration}, #{warningTime}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="addCandidateToProject">
+        INSERT INTO
+            project_candidate_mid(project_id, candidate_id, create_time, update_time)
+        VALUES (#{projectId}, #{candidateId}, #{createTime}, #{updateTime})
+
+    </insert>
+
+    <update id="updateProject">
+        UPDATE project
+        <set>
+            <if test="projectDescription != null">
+                project_description = #{projectDescription},
+            </if>
+            <if test="isIndividual != null">
+               is_individual = #{isIndividual}
+                ,
+            </if>
+            <if test="duration != null">
+                duration = #{duration}
+                ,
+            </if>
+            <if test="warningTime != null">
+                warning_time = #{warningTime}
+                ,
+            </if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteProjectById">
+        UPDATE project
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            id = #{id} AND is_deleted = 0
+    </update>
+    <update id="deleteCandidateFromProject">
+        UPDATE project_candidate_mid
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            candidate_id = #{candidateId} AND project_id = #{projectId} AND is_deleted = 0
+    </update>
+
+    <update id="removeAllCandidatesFromProject">
+        UPDATE project_candidate_mid
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            project_id = #{projectId} AND is_deleted = 0
+    </update>
+
+    <update id="removeAllTeamsFromProject">
+        UPDATE project_team_mid
+        SET
+            is_deleted = 1,
+            update_time = #{updateTime}
+        WHERE
+            project_id = #{projectId} AND is_deleted = 0
+    </update>
+
+    <select id="findAllTeamsInProject" resultType="java.lang.Integer">
+        SELECT team_id FROM project_team_mid WHERE project_id = #{projectId} AND is_deleted = 0
+    </select>
+
+    <select id="findProjectByDescription" resultType="com.feredback.feredback_backend.entity.Project">
+        SELECT * FROM project WHERE project_description = #{projectDescription}
+                                AND subject_id = #{subjectId}
+                                AND is_deleted = 0
+    </select>
+    <select id="findProjectById" resultType="com.feredback.feredback_backend.entity.Project">
+        SELECT * FROM project WHERE id = #{id} AND is_deleted = 0
+    </select>
+    <select id="findProjectByTemplateId" resultType="com.feredback.feredback_backend.entity.Project">
+        SELECT * FROM project WHERE template_id = #{templateId} AND is_deleted = 0
+    </select>
+
+    <select id="findAllProjects" resultType="com.feredback.feredback_backend.entity.Project">
+        SELECT * FROM project WHERE subject_id = #{subjectId} AND is_deleted = 0
+    </select>
+
+    <select id="findIndividualCandidatesInProject"
+            resultType="com.feredback.feredback_backend.entity.Candidate">
+        SELECT c.id,c.first_name,c.middle_name,c.last_name,c.email
+            FROM candidate c INNER JOIN project_candidate_mid pc
+            ON pc.candidate_id = c.id
+           WHERE pc.project_id = #{projectId} AND pc.is_deleted = 0
+            AND c.is_deleted = 0
+    </select>
+    <select id="getCandidatesByProjectId" resultType="com.feredback.feredback_backend.entity.Candidate"></select>
+
+    <select id="findProjectWithoutTemplate" resultType="com.feredback.feredback_backend.entity.Project">
+        SELECT * FROM project WHERE subject_id = #{subjectId}
+                                AND is_deleted = 0
+                                AND template_id is null
+
+    </select>
+
+
+</mapper>
+   

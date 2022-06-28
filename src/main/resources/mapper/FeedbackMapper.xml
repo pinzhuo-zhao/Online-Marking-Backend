@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.FeedbackMapper">
+    <sql id="candidateCommentSelect">
+        SELECT
+            id,
+            project_candidate_id,
+            rubric_subitem_id,
+            comment_id
+        FROM feedback_candidate_comment
+    </sql>
+
+    <sql id="candidateMarkSelect">
+        SELECT
+            id,
+            project_candidate_id,
+            rubric_item_id,
+            mark,
+            additional_comment
+        FROM feedback_candidate_mark
+    </sql>
+
+    <sql id="teamCommentSelect">
+        SELECT
+            id,
+            project_team_id,
+            rubric_subitem_id,
+            comment_id
+        FROM feedback_team_comment
+    </sql>
+
+    <sql id="teamMarkSelect">
+        SELECT
+            id,
+            project_team_id,
+            rubric_item_id,
+            mark,
+            additional_comment
+        FROM feedback_team_mark
+    </sql>
+
+    <sql id="teamPersonalSelect">
+        SELECT
+            id,
+            project_team_id,
+            candidate_id,
+            feedback
+        FROM feedback_team_personal
+    </sql>
+
+    <select id="getProjectCandidateRelationship" resultType="java.lang.Integer">
+        SELECT id FROM project_candidate_mid
+        <where>
+            project_id = #{projectId} AND candidate_id = #{candidateId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getProjectTeamRelationship" resultType="java.lang.Integer">
+        SELECT id FROM project_team_mid
+        <where>
+            project_id = #{projectId} AND team_id = #{teamId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <update id="saveCandidateGeneralFeedback">
+        UPDATE project_candidate_mid
+        <set>
+            general_comment = #{generalFeedback},
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="saveTeamGeneralFeedback">
+        UPDATE project_team_mid
+        <set>
+            general_comment = #{generalFeedback},
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="setCandidateAssessmentDate">
+        UPDATE project_candidate_mid
+        <set>
+            assessment_date = #{assessmentDate},
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="setTeamAssessmentDate">
+        UPDATE project_team_mid
+        <set>
+            assessment_date = #{assessmentDate},
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <select id="getCandidateGeneral" resultType="com.feredback.feredback_backend.entity.vo.FeedbackGeneralVo">
+        SELECT
+               general_comment,
+               assessment_date
+        FROM project_candidate_mid
+        <where>
+            id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamGeneral" resultType="com.feredback.feredback_backend.entity.vo.FeedbackGeneralVo">
+        SELECT
+               general_comment,
+               assessment_date
+        FROM project_team_mid
+        <where>
+            id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <insert id="insertCandidateComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            feedback_candidate_comment (project_candidate_id, rubric_subitem_id, comment_id, create_time, update_time)
+        VALUES (#{projectCandidateId}, #{rubricSubItemId}, #{commentId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertCandidateMark" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            feedback_candidate_mark (project_candidate_id, rubric_item_id, mark, additional_comment, create_time, update_time)
+        VALUES (#{projectCandidateId}, #{rubricItemId}, #{mark}, #{additionalComment}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertTeamComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            feedback_team_comment (project_team_id, rubric_subitem_id, comment_id, create_time, update_time)
+        VALUES (#{projectTeamId}, #{rubricSubItemId}, #{commentId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertTeamMark" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            feedback_team_mark (project_team_id, rubric_item_id, mark, additional_comment, create_time, update_time)
+        VALUES (#{projectTeamId}, #{rubricItemId}, #{mark}, #{additionalComment}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertTeamPersonal" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            feedback_team_personal (project_team_id, candidate_id, feedback, create_time, update_time)
+        VALUES (#{projectTeamId}, #{candidateId}, #{feedback}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="getCandidateCommentByRubricId" resultType="com.feredback.feredback_backend.entity.FeedbackCandidateComment">
+        <include refid="candidateCommentSelect"/>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND rubric_subitem_id = #{rubricSubItemId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getCandidateMarkByRubricId" resultType="com.feredback.feredback_backend.entity.FeedbackCandidateMark">
+        <include refid="candidateMarkSelect"/>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND rubric_item_id = #{rubricItemId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamCommentByRubricId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamComment">
+        <include refid="teamCommentSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND rubric_subitem_id = #{rubricSubItemId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamMarkByRubricId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamMark">
+        <include refid="teamMarkSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND rubric_item_id = #{rubricItemId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamPersonalByCandidateId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamPersonal">
+        <include refid="teamPersonalSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND candidate_id = #{candidateId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getCandidateCommentByMidId" resultType="com.feredback.feredback_backend.entity.FeedbackCandidateComment">
+        <include refid="candidateCommentSelect"/>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getCandidateMarkByMidId" resultType="com.feredback.feredback_backend.entity.FeedbackCandidateMark">
+        <include refid="candidateMarkSelect"/>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamCommentByMidId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamComment">
+        <include refid="teamCommentSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamMarkByMidId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamMark">
+        <include refid="teamMarkSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <select id="getTeamPersonalByMidId" resultType="com.feredback.feredback_backend.entity.FeedbackTeamPersonal">
+        <include refid="teamPersonalSelect"/>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </select>
+
+    <update id="updateCandidateCommentById">
+        UPDATE feedback_candidate_comment
+        <set>
+            <if test="projectCandidateId != null">
+                project_candidate_id = #{projectCandidateId},
+            </if>
+            <if test="rubricSubItemId != null">
+                rubric_subitem_id = #{rubricSubItemId},
+            </if>
+            <if test="commentId != null">
+                comment_id = #{commentId},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="updateCandidateMarkById">
+        UPDATE feedback_candidate_mark
+        <set>
+            <if test="projectCandidateId != null">
+                project_candidate_id = #{projectCandidateId},
+            </if>
+            <if test="rubricItemId != null">
+                rubric_item_id = #{rubricItemId},
+            </if>
+            <if test="mark != null">
+                mark = #{mark},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="updateTeamCommentById">
+        UPDATE feedback_team_comment
+        <set>
+            <if test="projectTeamId != null">
+                project_team_id = #{projectTeamId},
+            </if>
+            <if test="rubricSubItemId != null">
+                rubric_subitem_id = #{rubricSubItemId},
+            </if>
+            <if test="commentId != null">
+                comment_id = #{commentId},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="updateTeamMarkById">
+        UPDATE feedback_team_mark
+        <set>
+            <if test="projectTeamId != null">
+                project_team_id = #{projectTeamId},
+            </if>
+            <if test="rubricItemId != null">
+                rubric_item_id = #{rubricItemId},
+            </if>
+            <if test="mark != null">
+                mark = #{mark},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="updateTeamPersonalById">
+        UPDATE feedback_team_personal
+        <set>
+            <if test="projectTeamId != null">
+                project_team_id = #{projectTeamId},
+            </if>
+            <if test="candidateId != null">
+                candidate_id = #{candidateId},
+            </if>
+            <if test="feedback != null">
+                feedback = #{feedback},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteCandidateCommentById">
+        UPDATE feedback_candidate_comment
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteCandidateMarkById">
+        UPDATE feedback_candidate_mark
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteTeamCommentById">
+        UPDATE feedback_team_comment
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteTeamMarkById">
+        UPDATE feedback_team_mark
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="deleteTeamPersonalById">
+        UPDATE feedback_team_personal
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            id = #{id} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="clearCandidateCommentByMidId">
+        UPDATE feedback_candidate_comment
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="clearCandidateMarkByMidId">
+        UPDATE feedback_candidate_mark
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            project_candidate_id = #{projectCandidateId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="clearTeamCommentByMidId">
+        UPDATE feedback_team_comment
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="clearTeamMarkByMidId">
+        UPDATE feedback_team_mark
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </update>
+
+    <update id="clearTeamPersonalByMidId">
+        UPDATE feedback_team_personal
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            project_team_id = #{projectTeamId} AND is_deleted = 0
+        </where>
+    </update>
+</mapper>

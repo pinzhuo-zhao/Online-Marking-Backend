@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.feredback.feredback_backend.mapper.RubricItemMapper">
+    <sql id="selectSql">
+        SELECT
+            id,
+            `name`,
+            subject_id
+        FROM rubric_item
+    </sql>
+
+    <sql id="selectJoinTemplateMid">
+        SELECT
+            r.id,
+            r.`name`,
+            r.subject_id
+        FROM rubric_item as r
+        JOIN template_rubric_item_mid as mid
+        ON r.id = mid.rubric_item_id
+        AND r.is_deleted = 0
+        AND mid.is_deleted = 0
+    </sql>
+
+    <insert id="insertRubricItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            rubric_item (`name`, subject_id,create_time, update_time)
+        VALUES
+            (#{name}, #{subjectId}, #{createTime}, #{updateTime})
+    </insert>
+    <delete id="clearAllSubItems">
+        DELETE FROM rubric_subitem
+            WHERE rubric_item_id = #{rubricItemId} AND is_deleted = 0
+    </delete>
+
+    <select id="findRubricItemById" resultType="com.feredback.feredback_backend.entity.RubricItem">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </select>
+
+    <select id="findRubricItemByName" resultType="com.feredback.feredback_backend.entity.RubricItem">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND `name` LIKE CONCAT('%',#{name},'%')
+        </where>
+    </select>
+
+    <select id="findRubricItemsByTemplateId" resultType="com.feredback.feredback_backend.entity.RubricItem">
+        <include refid="selectJoinTemplateMid"/>
+        <where>
+            mid.template_id = #{templateId}
+        </where>
+    </select>
+
+    <select id="findAllRubricItems" resultType="com.feredback.feredback_backend.entity.RubricItem">
+        <include refid="selectSql"/>
+        <where>
+            is_deleted = 0 AND (subject_id = #{subjectId} OR subject_id is null)
+        </where>
+    </select>
+    <select id="findRubricItemByNameAndSubjectId"
+            resultType="com.feredback.feredback_backend.entity.RubricItem">
+        <include refid="selectSql"/>
+        <where>
+        is_deleted = 0 AND subject_id = #{subjectId} AND `name` = #{name}
+        </where>
+    </select>
+
+    <update id="updateRubricItemById">
+        UPDATE rubric_item
+        <set>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+          <!--  <if test="markSettingId != null">
+                mark_setting_id = #{markSettingId},
+            </if>-->
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+
+    <update id="deleteRubricItemById">
+        UPDATE rubric_item
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND id = #{id}
+        </where>
+    </update>
+
+    <update id="removeRubricItemFromAllTemplates">
+        UPDATE template_rubric_item_mid
+        <set>
+            is_deleted = 1,
+            update_time = #{updateTime}
+        </set>
+        <where>
+            is_deleted = 0 AND rubric_item_id = #{rubricItemId}
+        </where>
+    </update>
+</mapper>
+   
