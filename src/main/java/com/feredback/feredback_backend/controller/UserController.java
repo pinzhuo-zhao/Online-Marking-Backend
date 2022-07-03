@@ -4,18 +4,21 @@ import com.feredback.feredback_backend.entity.User;
 import com.feredback.feredback_backend.entity.vo.CoordinatorVo;
 import com.feredback.feredback_backend.entity.vo.EmailVo;
 import com.feredback.feredback_backend.entity.vo.UserVo;
+import com.feredback.feredback_backend.mapper.UserMapper;
 import com.feredback.feredback_backend.service.IEmailService;
 import com.feredback.feredback_backend.service.ISubjectService;
 import com.feredback.feredback_backend.service.IUserService;
 import com.feredback.feredback_backend.service.ex.DataModificationException;
 import com.feredback.feredback_backend.service.ex.UserNotFoundException;
 import com.feredback.feredback_backend.util.JsonResult;
+import com.feredback.feredback_backend.util.JwtUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -154,6 +157,16 @@ public class UserController extends BaseController {
             return  JsonResult.ok();
         }
         return JsonResult.error().message("There is a problem occurred when updating your password");
+    }
+
+    public JsonResult getMemberInfo(HttpServletRequest request) {
+        String memberIdByJwtToken = JwtUtils.getMemberIdByJwtToken(request);
+        User user = userService.findUserByEmail(memberIdByJwtToken);
+        UserVo userVo = new UserVo();
+        BeanUtils.copyProperties(user,userVo);
+        JsonResult result = JsonResult.ok();
+        result.data("user",userVo);
+        return result;
     }
 
 
