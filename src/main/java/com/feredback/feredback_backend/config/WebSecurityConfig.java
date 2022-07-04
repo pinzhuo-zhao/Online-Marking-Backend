@@ -1,5 +1,7 @@
 package com.feredback.feredback_backend.config;
 import com.feredback.feredback_backend.security.*;
+import com.feredback.feredback_backend.security.filter.TokenLoginFilter;
+import com.feredback.feredback_backend.security.handler.LogoutFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,21 +13,18 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
-import java.util.Arrays;
-
-import static java.util.Arrays.*;
 
 /**
  * @program: FE-Redback
@@ -47,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public UserDetailsService customUserService() {
         return new UserDetailsServiceImpl();
     }
+
     @Autowired
     private AuthenticationSuccessHandler successHandler;
 
@@ -61,6 +61,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
+    private TokenLoginFilter tokenLoginFilter;
 
     @Bean
     @Override
@@ -106,6 +109,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 //        http.cors().and().csrf().disable();
         http.cors().and().csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .formLogin().permitAll().successHandler(successHandler)
                 .failureHandler(failureHandler)
                 .and()
@@ -119,8 +124,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/**/coordinator/**").hasAuthority("coordinator")
                 .antMatchers("/api/**/admin/**").hasAuthority("admin")
                 .antMatchers("/api/**").hasAuthority("tutor")
+                .antMatchers("/api/user/login").anonymous()
+
                 //only one user can use a particular account at once
                 .and().sessionManagement().maximumSessions(1);
+        http.addFilterBefore(tokenLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
 
@@ -128,6 +136,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/api/user/sendVerificationCode");
         web.ignoring().antMatchers("/api/user/changePassword");
+        web.ignoring().antMatchers("/api/user/login");
 
+    }
+
+    //JWT
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.Objects;
+
 /**
  * @program: FE-Redback
  * @description:
@@ -22,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User userFound = userService.findUserByEmail(email);
-        if (null == userFound) {
+        if (Objects.isNull(userFound)) {
             //meaning we can't find the user with this username in the database
             throw new UserNotFoundException("Wrong Email or Password");
         }

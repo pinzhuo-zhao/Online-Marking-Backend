@@ -1,4 +1,4 @@
-package com.feredback.feredback_backend.security;
+package com.feredback.feredback_backend.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feredback.feredback_backend.util.JsonResult;

@@ -4,11 +4,10 @@ import com.feredback.feredback_backend.entity.User;
 import com.feredback.feredback_backend.entity.vo.CoordinatorVo;
 import com.feredback.feredback_backend.entity.vo.EmailVo;
 import com.feredback.feredback_backend.entity.vo.UserVo;
-import com.feredback.feredback_backend.mapper.UserMapper;
 import com.feredback.feredback_backend.service.IEmailService;
+import com.feredback.feredback_backend.service.ILoginService;
 import com.feredback.feredback_backend.service.ISubjectService;
 import com.feredback.feredback_backend.service.IUserService;
-import com.feredback.feredback_backend.service.ex.DataModificationException;
 import com.feredback.feredback_backend.service.ex.UserNotFoundException;
 import com.feredback.feredback_backend.util.JsonResult;
 import com.feredback.feredback_backend.util.JwtUtils;
@@ -41,6 +40,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private IEmailService emailService;
+
+    @Autowired
+    private ILoginService loginService;
 
     @ApiOperation("Form needs firstName, middleName(optional), lastName, isHeadTutor, email, path variable needs id")
     @PostMapping("coordinator/addTutor/{subjectId}")
@@ -159,8 +161,16 @@ public class UserController extends BaseController {
         return JsonResult.error().message("There is a problem occurred when updating your password");
     }
 
+
+    @PostMapping("login")
+    public JsonResult login(@RequestBody User user) {
+        String jwtToken = loginService.login(user);
+        return JsonResult.ok().data("token",jwtToken);
+    }
+
+
     public JsonResult getMemberInfo(HttpServletRequest request) {
-        String memberIdByJwtToken = JwtUtils.getMemberIdByJwtToken(request);
+        String memberIdByJwtToken = JwtUtils.getMemberEmailByJwtToken(request);
         User user = userService.findUserByEmail(memberIdByJwtToken);
         UserVo userVo = new UserVo();
         BeanUtils.copyProperties(user,userVo);

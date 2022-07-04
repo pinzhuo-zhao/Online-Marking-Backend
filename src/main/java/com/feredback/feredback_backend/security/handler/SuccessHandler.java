@@ -1,8 +1,9 @@
-package com.feredback.feredback_backend.security;
+package com.feredback.feredback_backend.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feredback.feredback_backend.entity.User;
 import com.feredback.feredback_backend.entity.vo.UserVo;
+import com.feredback.feredback_backend.security.SecurityUser;
 import com.feredback.feredback_backend.util.JsonResult;
 import com.feredback.feredback_backend.util.SecurityContextUtil;
 import org.springframework.beans.BeanUtils;
@@ -29,7 +30,9 @@ import java.io.IOException;
 public class SuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
-        User loggedInUser = SecurityContextUtil.getCurrentUser();
+        //User loggedInUser = SecurityContextUtil.getCurrentUser();
+        User loggedInUser = ((SecurityUser) authentication.getPrincipal()).getLoggedInUser();
+
     /*     if nothing goes wrong, return the user found to frontend, but only a part of the fields'
          value will be returned as a UserVO, for security reasons.*/
         UserVo userVo = new UserVo();

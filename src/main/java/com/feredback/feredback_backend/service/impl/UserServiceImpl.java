@@ -6,15 +6,20 @@ import com.feredback.feredback_backend.entity.vo.CoordinatorVo;
 import com.feredback.feredback_backend.entity.vo.UserVo;
 import com.feredback.feredback_backend.mapper.SubjectMapper;
 import com.feredback.feredback_backend.mapper.UserMapper;
+import com.feredback.feredback_backend.security.SecurityUser;
 import com.feredback.feredback_backend.service.IUserService;
 import com.feredback.feredback_backend.service.ex.*;
 import com.feredback.feredback_backend.util.CsvUtils;
+import com.feredback.feredback_backend.util.JwtUtils;
 import com.feredback.feredback_backend.util.SecurityContextUtil;
 import de.siegmar.fastcsv.reader.CsvContainer;
 import de.siegmar.fastcsv.reader.CsvRow;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +44,8 @@ private SubjectMapper subjectMapper;
 
 @Value("${user.verificationMinutes.limit}")
 private Integer expiryTime;
+
+
 
 
 
@@ -273,6 +280,8 @@ private Integer expiryTime;
             throw new DataModificationException("There is an error deleting this user");
         }
     }
+
+
 
 
 }

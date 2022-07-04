@@ -3,7 +3,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -27,7 +26,7 @@ public class JwtUtils {
     public static final String APP_SECRET = "ukc8BDbRigUDaY6pZFfWus2jZWLPHO";
 
     //Generating token
-    public static String getJwtToken(String id, String nickname){
+    public static String getJwtToken(String id, String email){
 
         String JwtToken = Jwts.builder()
                 //setting header info in JWT
@@ -39,7 +38,7 @@ public class JwtUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
 
                 .claim("id", id)
-                .claim("nickname", nickname)
+                .claim("email", email)
                 //set up signature
                 .signWith(SignatureAlgorithm.HS256, APP_SECRET)
                 .compact();
@@ -90,13 +89,13 @@ public class JwtUtils {
      * @param request
      * @return
      */
-    public static String getMemberIdByJwtToken(HttpServletRequest request) {
+    public static String getMemberEmailByJwtToken(HttpServletRequest request) {
         String jwtToken = request.getHeader("token");
         if(StringUtils.isEmpty(jwtToken)) {
             return "";
         }
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
         Claims claims = claimsJws.getBody();
-        return (String)claims.get("id");
+        return (String)claims.get("email");
     }
 }
